@@ -1,12 +1,12 @@
 # ChikitsaMitra: AI-Powered Preventive & Assisted Healthcare Ecosystem
 
-## 💡 **Project Vision**
+##  **Project Vision**
 
 **ChikitsaMitra** is a comprehensive, multi-modal AI companion designed to bridge critical gaps in the Indian healthcare landscape.
 
 We address issues of **access**, **misinformation**, **language barriers**, and **fragmented appointment systems** by combining verified AI guidance with integrated hospital booking and gamified preventative wellness.
 
-### 🩺 Problems Solved
+###  Problems Solved
 
 * Lack of **24x7 medical guidance** for rural and elderly users.
 
@@ -14,11 +14,11 @@ We address issues of **access**, **misinformation**, **language barriers**, and 
 
 * Need for an **engaging platform** to encourage preventive health habits.
 
-## ✨ **Core Features**
+##  **Core Features**
 
 ChikitsaMitra is divided into three core modules, all accessible via a unified, responsive web interface:
 
-### 🧠 1. AI Health Companion (Chatbot)
+###  1. AI Health Companion (Chatbot)
 
 | **Feature** | **Description** | 
  | ----- | ----- | 
@@ -26,7 +26,7 @@ ChikitsaMitra is divided into three core modules, all accessible via a unified, 
 | **Intelligent Triage** | Provides verified medical guidance and detects early health or stress symptoms. | 
 | **Multilingual Support** | Designed for accessibility, addressing language barriers for regional users. | 
 
-### 🏥 2. Assisted Appointment Booking
+###  2. Assisted Appointment Booking
 
 | **Feature** | **Description** | 
  | ----- | ----- | 
@@ -34,11 +34,11 @@ ChikitsaMitra is divided into three core modules, all accessible via a unified, 
 | **Cascading Selectors** | Dynamic, validated forms based on State, District, Hospital, and Department. | 
 | **Security & Confirmation** | Includes OTP verification logic for phone numbers and generates a downloadable PDF appointment slip using **jspdf** and **html2canvas**. | 
 
-### 🎮 3. Gamified Wellness & Engagement
+###  3. Gamified Wellness & Engagement
 
 To encourage daily usage and mental health monitoring, we integrated simple, coin-based reward games:
 
-* 🧘 **Inhale & Exhale**: A guided breathing exercise that rewards coins upon cycle completion.
+*  **Inhale & Exhale**: A guided breathing exercise that rewards coins upon cycle completion.
 
   *(File: `inhaleexhale.html`)* - 🕹️ **Tic-Tac-Toe**: A quick game against the AI, also linked to the reward system.
 
@@ -68,7 +68,7 @@ The **ChikitsaMitra** web application follows a clean separation of concerns:
 
   * Gamification state (user coins/points) is persisted using **Google Firestore** for a real-time, multi-session experience.
 
-## 🚀 **Getting Started**
+##  **Getting Started**
 
 Follow these simple steps to set up and run **ChikitsaMitra** locally:
 
