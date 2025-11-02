@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ChikitsaMitra - Your AI Health Companion</title>
+    <link rel="stylesheet" href="styles.css" />
+    <!-- Font Awesome for icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <!-- Google Fonts -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  </head>
+  <body>
+    <!-- Sidebar -->
+    <aside id="sidebar" class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo-container">
+          <img
+            src="..\static\chikitlogo.jpg"
+            alt="ChikitsaMitra Logo"
+            class="logo"
+          />
+          <h2 class="sidebar-title">ChikitsaMitra</h2>
+        </div>
+        <button id="closeSidebar" class="close-sidebar">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <div class="sidebar-content">
+        <div class="sidebar-section">
+          <p class="sidebar-label">Main Menu</p>
+          <nav class="sidebar-menu">
+            <a href="#" class="menu-item active" data-section="home">
+              <i class="fas fa-home"></i>
+              <span>Home</span>
+            </a>
+            <a href="#" class="menu-item" data-section="appointments">
+              <i class="fas fa-calendar-check"></i>
+              <span>Appointments</span>
+            </a>
+            <a href="#" class="menu-item" data-section="booking-status">
+              <i class="fas fa-clipboard-list"></i>
+              <span>Booking Status</span>
+            </a>
+            <a href="#" class="menu-item" data-section="hospitals">
+              <i class="fas fa-hospital"></i>
+              <span>Hospitals</span>
+            </a>
+
+            <a href="#" class="menu-item" data-section="games">
+              <i class="fas fa-gamepad"></i>
+              <span>Games</span>
+            </a>
+            <a href="#" class="menu-item" data-section="benefits">
+              <i class="fas fa-gifts"></i>
+              <span>Benefits</span>
+            </a>
+            
+          </nav>
+          </nav>
+        </div>
+
+        <div class="sidebar-section">
+          <p class="sidebar-label">Account</p>
+          <nav class="sidebar-menu">
+            <a href="#" class="menu-item" data-section="profile">
+              <i class="fas fa-user"></i>
+              <span>Profile</span>
+            </a>
+            <a href="#" class="menu-item" data-section="about">
+              <i class="fas fa-info-circle"></i>
+              <span>About</span>
+            </a>
+            <a href="#" class="menu-item" data-section="faq">
+              <i class="fas fa-question-circle"></i>
+              <span>FAQ</span>
+            </a>
+            <a href="#" class="menu-item" data-section="contact">
+              <i class="fas fa-envelope"></i>
+              <span>Contact</span>
+            </a>
+          </nav>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="main-wrapper">
+      <!-- Header -->
+      <header class="header">
+        <button id="toggleSidebar" class="toggle-sidebar">
+          <i class="fas fa-bars"></i>
+        </button>
+        <h1 class="header-title">ChikitsaMitra - Your AI Health Companion</h1>
+      </header>
+
+      <!-- Content Area -->
+      <main id="content" class="content">
+        <!-- Home Section -->
+        <section id="home-section" class="section active">
+          <!-- Hero -->
+          <div class="hero">
+            <div class="hero-content">
+              <div class="hero-logo-title">
+                <img
+                  src="..\static\chikitlogo.jpg"
+                  alt="ChikitsaMitra Logo"
+                  class="hero-logo"
+                />
+                <h1 class="hero-title">ChikitsaMitra</h1>
+              </div>
+              <h2 class="hero-subtitle">Your AI Health Companion</h2>
+              <p class="hero-text">
+                Accessible healthcare guidance 24×7 in your language.
+              </p>
+              <button id="startChatBtn" class="btn btn-primary">
+                Start Chat
+              </button>
+            </div>
+            <img
+              src="https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=600"
+              alt="Healthcare"
+              class="hero-image"
+            />
+          </div>
+
+          <!-- Features -->
+          <div class="features">
+            <h2 class="features-title">A New Era of Healthcare Access</h2>
+            <p class="features-subtitle">
+              ChikitsaMitra leverages cutting-edge AI to make health information
+              accessible to everyone, everywhere.
+            </p>
+            <div class="features-grid">
+              <div class="feature-card">
+                <div class="feature-icon"><img src="../../Extract/Images/stetoscope.png" alt="" srcset="" style="width: 15rem; clip-path: circle(1.7rem at 45%); box-shadow: inset 12rem 12rem 10rem rgb(24, 127, 246);"></div>
+                <h3 class="feature-title">AI Health Chatbot</h3>
+                <p class="feature-description">
+                  Get instant, personalized health guidance from our advanced
+                  AI, available anytime you need it.
+                </p>
+              </div>
+              <div class="feature-card">
+                <div class="feature-icon">🌐</div>
+                <h3 class="feature-title">Multilingual Support</h3>
+                <p class="feature-description">
+                  Communicate in your preferred language for clear and
+                  comfortable health conversations.
+                </p>
+              </div>
+              <div class="feature-card">
+                <div class="feature-icon">👨‍⚕</div>
+                <h3 class="feature-title">Expert-Backed Info</h3>
+                <p class="feature-description">
+                  Our AI provides information from verified sources like the WHO
+                  and Ministry of Health.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Appointments Section -->
+        <section id="appointments-section" class="section">
+          <div class="section-container">
+            <h2 class="section-title">Book Hospital Appointment</h2>
+            <p class="section-subtitle">
+              Fill in the details below to book your appointment at a government
+              hospital.
+            </p>
+
+            <div class="card">
+              <form id="appointmentForm" class="form">
+                <div class="form-group">
+                  <label for="name">Full Name *</label>
+                  <input
+                    type="text"
+                    id="name"
+                    required
+                    placeholder="Enter your full name"
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label>Gender *</label>
+                  <div class="radio-group">
+                    <label class="radio-label">
+                      <input type="radio" name="gender" value="male" required />
+                      <span>Male</span>
+                    </label>
+                    <label class="radio-label">
+                      <input
+                        type="radio"
+                        name="gender"
+                        value="female"
+                        required
+                      />
+                      <span>Female</span>
+                    </label>
+                    <label class="radio-label">
+                      <input
+                        type="radio"
+                        name="gender"
+                        value="other"
+                        required
+                      />
+                      <span>Other</span>
+                    </label>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="phone">Phone Number *</label>
+                  <div class="input-group">
+                    <input
+                      type="tel"
+                      id="phone"
+                      maxlength="10"
+                      placeholder="Enter 10-digit phone number"
+                    />
+                    <button
+                      type="button"
+                      id="sendOtpBtn"
+                      class="btn btn-secondary"
+                    >
+                      Send OTP
+                    </button>
+                  </div>
+                  <div
+                    id="otpSection"
+                    class="otp-section"
+                    style="display: none"
+                  >
+                    <div class="input-group">
+                      <input
+                        type="text"
+                        id="otp"
+                        maxlength="6"
+                        placeholder="Enter 6-digit OTP"
+                      />
+                      <button
+                        type="button"
+                        id="verifyOtpBtn"
+                        class="btn btn-primary"
+                      >
+                        Verify
+                      </button>
+                    </div>
+                  </div>
+                  <div
+                    id="verifiedBadge"
+                    class="verified-badge"
+                    style="display: none"
+                  >
+                    <i class="fas fa-check-circle"></i> Verified
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="dob">Date of Birth *</label>
+                  <input type="date" id="dob" required />
+                </div>
+
+                <div class="form-group">
+                  <label for="state">Select State *</label>
+                  <select id="state" required>
+                    <option value="">Choose a state</option>
+                    <option value="Delhi">Delhi</option>
+                    <option value="Maharashtra">Maharashtra</option>
+                    <option value="Uttar Pradesh">Uttar Pradesh</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label for="district">Select District *</label>
+                  <select id="district" required>
+                    <option value="">Choose a district</option>
+                    <option value="New Delhi">New Delhi</option>
+                    <option value="Mumbai">Mumbai</option>
+                    <option value="Lucknow">Lucknow</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label>Appointment Type *</label>
+                  <div class="radio-group">
+                    <label class="radio-label">
+                      <input
+                        type="radio"
+                        name="appointmentType"
+                        value="appointment"
+                        required
+                      />
+                      <span>Regular Appointment</span>
+                    </label>
+                    <label class="radio-label">
+                      <input
+                        type="radio"
+                        name="appointmentType"
+                        value="diagnosis"
+                        required
+                      />
+                      <span>Diagnosis & Tests</span>
+                    </label>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="hospital">Select Hospital *</label>
+                  <select id="hospital" required>
+                    <option value="">Choose a hospital</option>
+                    <option value="AIIMS Delhi">AIIMS Delhi</option>
+                    <option value="AIIMS Mumbai">AIIMS Mumbai</option>
+                    <option value="Safdarjung Hospital">
+                      Safdarjung Hospital
+                    </option>
+                    <option value="Ram Manohar Lohia Hospital">
+                      Ram Manohar Lohia Hospital
+                    </option>
+                    <option value="GTB Hospital">GTB Hospital</option>
+                    <option value="Lady Hardinge Medical College">
+                      Lady Hardinge Medical College
+                    </option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label for="department">Select Department *</label>
+                  <select id="department" required>
+                    <option value="">Choose a department</option>
+                    <option value="Orthopedics">Orthopedics</option>
+                    <option value="Dermatology">Dermatology</option>
+                    <option value="Cardiology">Cardiology</option>
+                    <option value="Neurology">Neurology</option>
+                    <option value="Pediatrics">Pediatrics</option>
+                    <option value="Gynecology">Gynecology</option>
+                    <option value="General Medicine">General Medicine</option>
+                    <option value="ENT">ENT</option>
+                  </select>
+                </div>
+
+
+                <div class="form-group">
+                  <label for="appointmentDate">Appointment Date *</label>
+                  <input type="date" id="appointmentDate" required />
+                </div>
+
+                <div class="form-group">
+                  <label for="slot">Available Time Slot *</label>
+                  <select id="slot" required>
+                    <option value="">Choose a time slot</option>
+                    <option value="09:00 AM - 09:30 AM">
+                      09:00 AM - 09:30 AM
+                    </option>
+                    <option value="09:30 AM - 10:00 AM">
+                      09:30 AM - 10:00 AM
+                    </option>
+                    <option value="10:00 AM - 10:30 AM">
+                      10:00 AM - 10:30 AM
+                    </option>
+                    <option value="10:30 AM - 11:00 AM">
+                      10:30 AM - 11:00 AM
+                    </option>
+                    <option value="11:00 AM - 11:30 AM">
+                      11:00 AM - 11:30 AM
+                    </option>
+                    <option value="02:00 PM - 02:30 PM">
+                      02:00 PM - 02:30 PM
+                    </option>
+                    <option value="02:30 PM - 03:00 PM">
+                      02:30 PM - 03:00 PM
+                    </option>
+                    <option value="03:00 PM - 03:30 PM">
+                      03:00 PM - 03:30 PM
+                    </option>
+                    <option value="03:30 PM - 04:00 PM">
+                      03:30 PM - 04:00 PM
+                    </option>
+                    <option value="04:00 PM - 04:30 PM">
+                      04:00 PM - 04:30 PM
+                    </option>
+                  </select>
+                </div>
+
+                <button
+                  type="submit"
+                  class="btn btn-primary btn-full"
+                  id="bookBtn"
+                  disabled
+                >
+                  Book Appointment
+                </button>
+              </form>
+            </div>
+          </div>
+        </section>
+
+        <!-- Booking Status Section -->
+        <section id="booking-status-section" class="section">
+          <div class="section-container">
+            <h2 class="section-title">Booking Status</h2>
+            <p class="section-subtitle">
+              View and manage your hospital appointments
+            </p>
+            <div id="bookingsList" class="bookings-list"></div>
+            
+          </div>
+        
+        </section>
+
+        <!-- Hospitals Section -->
+        <section id="hospitals-section" class="section">
+          <div class="section-container">
+            <h2 class="section-title">Find Nearby Hospitals</h2>
+            <p class="section-subtitle">Locate government hospitals near you</p>
+            <div class="map-container">
+              <iframe
+                src="https://www.google.com/maps/embed?pb=!1m16!1m12!1m3!1d224345.83923192544!2d77.06889754725782!3d28.52758200617607!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!2m1!1sgovernment%20hospitals%20delhi!5e0!3m2!1sen!2sin!4v1234567890"
+                class="map-iframe"
+                allowfullscreen=""
+                loading="lazy"
+              >
+              </iframe>
+            </div>
+          </div>
+        </section>
+
+        <section id="games-section" class="section">
+          <div class="section-container">
+            <h2 class="section-title">Play & Earn Coins</h2>
+            <p class="section-subtitle">
+              Take a break, play a game, and earn coins for rewards!
+            </p>
+
+            <div class="games-grid">
+              <div class="game-card">
+                <div class="game-icon">
+                  <i class="fas fa-wind"></i>
+                </div>
+                <h3 class="game-title">Mindful Breath Game</h3>
+                <p class="game-description">
+                  A calming breathing exercise. Complete cycles to earn coins
+                  and reduce stress.
+                </p>
+                <a
+                  href="inhaleexhale.html"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="btn btn-primary"
+                >
+                  Play Now
+                </a>
+              </div>
+
+              <div class="game-card">
+                <div class="game-icon">
+                  <i class="fas fa-hashtag"></i>
+                </div>
+                <h3 class="game-title">Tic-Tac-Boom!</h3>
+                <p class="game-description">
+                  Play a classic game of Tic-Tac-Toe against our AI. Win a match
+                  to earn a coin!
+                </p>
+                <a
+                  href="tictactoe.html"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="btn btn-primary"
+                >
+                  Play Now
+                </a>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        </section>
+
+
+        <section id="benefits-section" class="section">
+          <div class="section-container">
+
+            <div class="benefits-header">
+              <h2 class="section-title">Wellness Rewards Hub</h2>
+              <div class="coin-display">
+                <i class="fas fa-coins"></i>
+                <strong>1500</strong> Coins Available
+              </div>
+            </div>
+
+            <p class="section-subtitle">
+              Use your coins to redeem exclusive discounts on products and services.
+            </p>
+
+            <div class="rewards-filter-bar card">
+              <div class="form-group">
+                <label for="filter-category">Filter by:</label>
+                <select id="filter-category">
+                  <option value="all">All Categories</option>
+                  <option value="product">Products</option>
+                  <option value="subscription">Subscriptions</option>
+                  <option value="consultation">Consultations</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="sort-by">Sort by:</label>
+                <select id="sort-by">
+                  <option value="relevant">Most Relevant</option>
+                  <option value="cost-low-high">Cost: Low to High</option>
+                  <option value="cost-high-low">Cost: High to Low</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="rewards-grid">
+
+              <div class="reward-card">
+                <div class="reward-image" style="background-color: #5856D6;">
+                  <span>B.P. Monitor</span>
+                </div>
+                <div class="reward-content">
+                  <span class="reward-tag">PRODUCT</span>
+                  <h3 class="reward-title">Digital Blood Pressure Monitor</h3>
+                  <div class="reward-rating">
+                    <i class="fas fa-star"></i> 4.5 / 5
+                  </div>
+                  <div class="reward-pricing">
+                    <span class="reward-price-new">₹ 1,750</span>
+                    <span class="reward-price-old">₹ 2,600</span>
+                  </div>
+                  <div class="reward-coins">
+                    Apply Coins: <strong>850</strong> <i class="fas fa-coins"></i>
+                  </div>
+                  <div class="reward-actions">
+                    <button class="btn btn-primary">Redeem Now</button>
+                    <button class="btn btn-outline">Review</button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="reward-card">
+                <div class="reward-image" style="background-color: #5856D6;">
+                  <span>Gym Voucher</span>
+                </div>
+                <div class="reward-content">
+                  <span class="reward-tag">SUBSCRIPTION</span>
+                  <h3 class="reward-title">Gym Membership Discount Voucher</h3>
+                  <div class="reward-rating">
+                    <i class="fas fa-star"></i> 4.7 / 5
+                  </div>
+                  <div class="reward-pricing">
+                    <span class="reward-price-new">₹ 5,500</span>
+                    <span class="reward-price-old">₹ 7,000</span>
+                  </div>
+                  <div class="reward-coins">
+                    Apply Coins: <strong>1,500</strong> <i class="fas fa-coins"></i>
+                  </div>
+                  <div class="reward-actions">
+                    <button class="btn btn-primary">Redeem Now</button>
+                    <button class="btn btn-outline">Review</button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="reward-card">
+                <div class="reward-image" style="background-color: #5856D6;">
+                  <span>Cardiac Screening</span>
+                </div>
+                <div class="reward-content">
+                  <span class="reward-tag">PRODUCT</span>
+                  <h3 class="reward-title">Cardiac Screening Package</h3>
+                  <div class="reward-rating">
+                    <i class="fas fa-star"></i> 4.9 / 5
+                  </div>
+                  <div class="reward-pricing">
+                    <span class="reward-price-new">₹ 6,500</span>
+                    <span class="reward-price-old">₹ 8,000</span>
+                  </div>
+                  <div class="reward-coins">
+                    Apply Coins: <strong>1,500</strong> <i class="fas fa-coins"></i>
+                  </div>
+                  <div class="reward-actions">
+                    <button class="btn btn-primary">Redeem Now</button>
+                    <button class="btn btn-outline">Review</button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="reward-card">
+                <div class="reward-image" style="background-color: #5856D6;">
+                  <span>Sleep Coach</span>
+                </div>
+                <div class="reward-content">
+                  <span class="reward-tag">CONSULTATION</span>
+                  <h3 class="reward-title">Sleep Coach Program (4 Weeks)</h3>
+                  <div class="reward-rating">
+                    <i class="fas fa-star"></i> 4.5 / 5
+                  </div>
+                  <div class="reward-pricing">
+                    <span class="reward-price-new">₹ 2,600</span>
+                    <span class="reward-price-old">₹ 4,000</span>
+                  </div>
+                  <div class="reward-coins">
+                    Apply Coins: <strong>1,400</strong> <i class="fas fa-coins"></i>
+                  </div>
+                  <div class="reward-actions">
+                    <button class="btn btn-primary">Redeem Now</button>
+                    <button class="btn btn-outline">Review</button>
+                  </div>
+                </div>
+              </div>
+
+            </div> </div>
+        </section>
+    
+
+        <!-- Profile Section -->
+        <section id="profile-section" class="section">
+          <div class="section-container">
+            <h2 class="section-title">My Profile</h2>
+            <div class="card">
+              <div class="profile-header">
+                <div class="profile-avatar">
+                  <i class="fas fa-user"></i>
+                </div>
+                <div class="profile-info">
+                  <h3>Guest User</h3>
+                  <p>guest@chikitsamitra.in</p>
+                </div>
+              </div>
+              <div class="profile-details">
+                <div class="profile-item">
+                  <i class="fas fa-phone"></i>
+                  <span>+91 XXXXXXXXXX</span>
+                </div>
+                <div class="profile-item">
+                  <i class="fas fa-calendar"></i>
+                  <span>Member since 2025</span>
+                </div>
+                <div class="profile-item">
+                  <i class="fas fa-map-marker-alt"></i>
+                  <span>India</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- About Section -->
+        <section id="about-section" class="section">
+          <div class="section-container">
+            <h2 class="section-title">About ChikitsaMitra</h2>
+            <div class="card">
+              <p>
+                We are Team <strong>ChikitsaMitra</strong>, a group of passionate
+                Innovators committed to revolutionizing healthcare access.
+                ChikitsaMitra is our entry for the Smart India Hackathon (SIH)
+                2025.
+              </p>
+              <img
+                src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800"
+                alt="Team"
+                class="about-image"
+              />
+              <h3>Our Mission</h3>
+              <p>
+                To bridge the gap in healthcare accessibility by providing a
+                reliable, multilingual, and user-friendly AI companion that
+                empowers individuals to take control of their health.
+              </p>
+              <h3>Our Vision</h3>
+              <p>
+                We envision a future where everyone, regardless of location or
+                language, has immediate access to basic healthcare guidance,
+                leading to more informed and healthier communities.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- FAQ Section -->
+        <section id="faq-section" class="section">
+          <div class="section-container">
+            <h2 class="section-title">Frequently Asked Questions</h2>
+            <p class="section-subtitle">
+              Find answers to common questions about ChikitsaMitra.
+            </p>
+            <div class="accordion">
+              <div class="accordion-item">
+                <button class="accordion-header">
+                  <span>What is ChikitsaMitra?</span>
+                  <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="accordion-content">
+                  <p>
+                    ChikitsaMitra is an AI-powered healthcare assistant that
+                    helps users access healthcare information easily.
+                  </p>
+                </div>
+              </div>
+              <div class="accordion-item">
+                <button class="accordion-header">
+                  <span>Is ChikitsaMitra a replacement for a doctor?</span>
+                  <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="accordion-content">
+                  <p>
+                    No. ChikitsaMitra is an AI companion for guidance, but
+                    medical consultation with doctors is always recommended.
+                  </p>
+                </div>
+              </div>
+              <div class="accordion-item">
+                <button class="accordion-header">
+                  <span>How does the AI work?</span>
+                  <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="accordion-content">
+                  <p>
+                    It uses natural language processing and medical datasets to
+                    provide health-related information.
+                  </p>
+                </div>
+              </div>
+              <div class="accordion-item">
+                <button class="accordion-header">
+                  <span>Is my data private?</span>
+                  <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="accordion-content">
+                  <p>
+                    Yes. We prioritize privacy and security, ensuring that your
+                    data is encrypted and never misused.
+                  </p>
+                </div>
+              </div>
+              <div class="accordion-item">
+                <button class="accordion-header">
+                  <span>How can I book a hospital appointment?</span>
+                  <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="accordion-content">
+                  <p>
+                    You can use the appointment booking feature on the platform
+                    to connect with hospitals and schedule visits.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section id="contact-section" class="section">
+          <div class="section-container">
+            <h2 class="section-title">Contact Us</h2>
+            <div class="card">
+              <div class="contact-info">
+                <div class="contact-item">
+                  <i class="fas fa-envelope"></i>
+                  <div>
+                    <h4>Email</h4>
+                    <p>support@chikitsamitra.in</p>
+                  </div>
+                </div>
+                <div class="contact-item">
+                  <i class="fas fa-phone"></i>
+                  <div>
+                    <h4>Phone</h4>
+                    <p>+91 1800-XXX-XXXX</p>
+                  </div>
+                </div>
+                <div class="contact-item">
+                  <i class="fas fa-map-marker-alt"></i>
+                  <div>
+                    <h4>Address</h4>
+                    <p>New Delhi, India</p>
+                  </div>
+                </div>
+              </div>
+              <form class="contact-form">
+                <div class="form-group">
+                  <label for="contactName">Name</label>
+                  <input type="text" id="contactName" placeholder="Your name" />
+                </div>
+                <div class="form-group">
+                  <label for="contactEmail">Email</label>
+                  <input
+                    type="email"
+                    id="contactEmail"
+                    placeholder="Your email"
+                  />
+                </div>
+                <div class="form-group">
+                  <label for="contactMessage">Message</label>
+                  <textarea
+                    id="contactMessage"
+                    rows="4"
+                    placeholder="Your message"
+                  ></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">
+                  Send Message
+                </button>
+              </form>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <!-- Footer -->
+      <footer class="footer">
+        <p>© 2025 ChikitsaMitra | All rights reserved</p>
+      </footer>
+    </div>
+
+    <!-- Chat Button -->
+    <button id="chatBtn" class="chat-btn">
+      <i class="fas fa-comment-dots"></i>
+    </button>
+
+    <!-- Chat Modal -->
+    <div id="chatModal" class="modal">
+      <div class="modal-content chat-modal">
+        <div class="chat-header">
+          <span>ChikitsaMitra AI</span>
+          <button id="closeChatBtn" class="close-btn">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div id="chatMessages" class="chat-messages"></div>
+        <div class="chat-input">
+          <input
+            type="text"
+            id="chatInput"
+            placeholder="Type your message..."
+          />
+          <button id="micBtn" class="icon-btn">
+            <i class="fas fa-microphone"></i>
+          </button>
+          <button id="sendBtn" class="icon-btn">
+            <i class="fas fa-paper-plane"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <script src="script.js"></script>
+    <!-- =================== Appointment PDF Template =================== -->
+<div id="appointmentPdfTemplate" class="pdf-template-hidden">
+  <div class="pdf-container">
+    <header class="pdf-header">
+      <img src="..\static\chikitlogo.jpg" alt="Chikitsa Mitra Logo" class="pdf-logo">
+      <div class="pdf-header-text">
+        <h1>Chikitsa Mitra</h1>
+        <p>Your Healthcare Companion</p>
+      </div>
+    </header>
+
+    <hr class="pdf-divider">
+
+    <section class="pdf-section">
+      <h2>Appointment Confirmation</h2>
+      <p>Thank you for booking your appointment through <strong>Chikitsa Mitra</strong>.</p>
+    </section>
+
+    <section class="pdf-details">
+      <table>
+        <tr><td><strong>Reference ID:</strong></td><td id="pdfRefId">N/A</td></tr>
+        <tr><td><strong>Patient Name:</strong></td><td id="pdfName">N/A</td></tr>
+        <tr><td><strong>Phone Number:</strong></td><td id="pdfPhone">N/A</td></tr>
+        <tr><td><strong>Date of Birth:</strong></td><td id="pdfDob">N/A</td></tr>
+        <tr><td><strong>Hospital:</strong></td><td id="pdfHospital">N/A</td></tr>
+        <tr><td><strong>Department:</strong></td><td id="pdfDept">N/A</td></tr>
+        <tr><td><strong>Appointment Date:</strong></td><td id="pdfDate">N/A</td></tr>
+        <tr><td><strong>Time Slot:</strong></td><td id="pdfSlot">N/A</td></tr>
+      </table>
+    </section>
+
+    <footer class="pdf-footer">
+      <p>We look forward to serving you. Wishing you good health!</p>
+      <p class="footer-note">Generated by Chikitsa Mitra – Your Healthcare Companion</p>
+    </footer>
+  </div>
+</div>
+<!-- =================== End of PDF Template =================== -->
+
+  </body>
+</html>

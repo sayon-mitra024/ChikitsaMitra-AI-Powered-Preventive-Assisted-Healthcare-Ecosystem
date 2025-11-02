@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catchy Tic-Tac-Toe</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Load Inter Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <!-- Load Firebase/Firestore Modules -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Set Firebase Log Level for debugging
+        setLogLevel('Debug');
+
+        // Global Firebase variables will be populated after initialization
+        window.db = null;
+        window.auth = null;
+        window.userId = null;
+        window.isAuthReady = false;
+
+        // Constants for Firestore paths
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-tictactoe-app-id';
+
+        // Firestore path for user-specific data (coins)
+        const getCoinsDocRef = (userId) => doc(
+            window.db,
+            'artifacts', appId,
+            'users', userId,
+            'game_data', 'coins'
+        );
+
+        /**
+         * Core App Setup Function: Initializes Firebase if configuration is available.
+         * Gracefully handles cases where configuration is missing (e.g., running locally).
+         */
+        async function setupFirebaseAndLoadData() {
+            // Restore status to connecting
+            const dbStatusElement = document.getElementById('status-db');
+            if (dbStatusElement) dbStatusElement.textContent = "Connecting...";
+
+            // PASTE YOUR FIREBASE CONFIG OBJECT HERE
+            const firebaseConfig = {
+              apiKey: "AIza...",
+              authDomain: "your-project.firebaseapp.com",
+              projectId: "your-project",
+              storageBucket: "your-project.appspot.com",
+              messagingSenderId: "...",
+              appId: "1:..."
+            };
+            
+            // This line tells the script that the config is present,
+            // bypassing the "local mode" check.
+            const configString = "true";
+
+            // 1. Check for valid configuration
+            if (!configString || configString.length < 5) {
+                console.warn("Firebase configuration not found. Running game without persistent coin storage.");
+                if (dbStatusElement) dbStatusElement.textContent = "Local Mode (Coins not saved)";
+                // Call renderStore here for the initial load in Local Mode
+                if (window.game.renderStore) window.game.renderStore();
+                return; 
+            }
+
+            try {
+                firebaseConfig = JSON.parse(configString);
+                
+                // 2. Initialize Firebase Services
+                const app = initializeApp(firebaseConfig);
+                window.db = getFirestore(app);
+                window.auth = getAuth(app);
+                if (dbStatusElement) dbStatusElement.textContent = "Database Ready";
+
+                // 3. Handle Authentication
+                onAuthStateChanged(window.auth, async (user) => {
+                    if (user) {
+                        window.userId = user.uid;
+                        console.log("Authenticated user ID:", window.userId);
+                    } else {
+                        // If no user, sign in anonymously or with custom token
+                        try {
+                            const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+                            if (initialAuthToken) {
+                                await signInWithCustomToken(window.auth, initialAuthToken);
+                            } else {
+                                await signInAnonymously(window.auth);
+                            }
+                            // The onAuthStateChanged will trigger again with the new user
+                            return;
+                        } catch (e) {
+                            console.error("Authentication failed:", e);
+                        }
+                    }
+
+                    window.isAuthReady = true;
+
+                    // 4. Load Coins Data using onSnapshot (real-time listener)
+                    if (window.userId) {
+                        const ref = getCoinsDocRef(window.userId);
+
+                        onSnapshot(ref, (docSnap) => {
+                            let currentCoins = 0;
+                            if (docSnap.exists()) {
+                                currentCoins = docSnap.data().value || 0;
+                            }
+                            console.log("Coins loaded/updated:", currentCoins);
+                            window.game.coins = currentCoins;
+                            document.getElementById('coins-display').textContent = currentCoins;
+                            
+                            // Important: Render the store to show up-to-date redemption status
+                            if (window.game.renderStore) window.game.renderStore(); 
+
+                        }, (error) => {
+                            console.error("Error listening to coins document:", error);
+                            if (dbStatusElement) dbStatusElement.textContent = "DB Error (Listen)";
+                        });
+                    }
+                });
+
+            } catch (e) {
+                // Catch for parsing error or initialization error
+                console.error("Firebase setup failed:", e);
+                if (dbStatusElement) dbStatusElement.textContent = "DB Error (Init/Parse)";
+            }
+        }
+
+        // Expose the necessary functions globally for HTML/JS access
+        window.saveCoins = async (newCoinValue) => {
+            if (!window.db || !window.userId || !window.isAuthReady) {
+                // Silently fail if not connected
+                console.warn("Database not ready or user not authenticated. Cannot save coins.");
+                return;
+            }
+            try {
+                const ref = getCoinsDocRef(window.userId);
+                await setDoc(ref, { value: newCoinValue }, { merge: true });
+                console.log("Coins saved:", newCoinValue);
+            } catch (e) {
+                console.error("Error saving coins:", e);
+            }
+        };
+
+        // Start Firebase setup when the window loads
+        window.addEventListener('load', setupFirebaseAndLoadData);
+    </script>
+
+    <style>
+        .cell {
+            width: 100px;
+            height: 100px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 4rem;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
+            user-select: none;
+            /* Light Shadow for depth */
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.06);
+        }
+
+        .cell:hover:not(.disabled) {
+            background-color: #e0f2fe; /* Light sky blue hover */
+            transform: scale(1.03);
+        }
+
+        .cell.disabled {
+            cursor: not-allowed;
+        }
+
+        .text-x {
+            color: #3b82f6; /* Blue for Human */
+        }
+
+        .text-o {
+            color: #ef4444; /* Red for AI */
+        }
+
+        /* Responsive grid adjustment for smaller screens */
+        @media (max-width: 450px) {
+            .cell {
+                width: 80px;
+                height: 80px;
+                font-size: 3rem;
+            }
+            #game-container {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 flex flex-col items-center justify-center min-h-screen p-4 font-['Inter']">
+
+    <!-- Game Container Card -->
+    <div id="game-container" class="bg-white p-8 md:p-12 rounded-xl shadow-2xl max-w-lg w-full text-center">
+
+        <h1 class="text-4xl font-extrabold text-gray-800 mb-2">
+            Tic-Tac-Boom!
+        </h1>
+        <p class="text-sm text-gray-500 mb-6">
+            You are 'X' (Human). The AI is 'O' (Computer).
+        </p>
+
+        <!-- Scoreboard and Status -->
+        <div class="flex justify-between items-center mb-6 p-4 rounded-lg bg-yellow-100 shadow-inner">
+            <div class="text-left">
+                <p class="text-lg font-semibold text-gray-700">Your Coin Balance: <span id="status-db" class="text-xs text-gray-500 font-normal ml-2">Connecting...</span></p>
+                <p id="coins-display" class="text-4xl font-bold text-yellow-600 leading-none">0</p>
+            </div>
+            <div class="text-right">
+                <p id="status-message" class="text-xl font-bold text-blue-600 transition duration-300">
+                    Your Turn
+                </p>
+            </div>
+        </div>
+
+        <!-- Tic-Tac-Toe Board -->
+        <div id="board" class="grid grid-cols-3 gap-2 bg-gray-200 p-2 rounded-lg mx-auto mb-6">
+            <!-- Cells will be dynamically created by JavaScript -->
+        </div>
+
+        <!-- Control Buttons -->
+        <div class="flex space-x-4 justify-center">
+            <button id="reset-button"
+                class="bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-6 rounded-lg transition duration-300 shadow-md hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-green-300"
+                onclick="window.game.resetGame()">
+                New Game
+            </button>
+        </div>
+
+        <!-- --- Redemption Store Section --- -->
+        <div class="mt-8 pt-6 border-t border-gray-200">
+            <h2 class="text-3xl font-bold text-gray-700 mb-4">Redemption Store</h2>
+            <p class="text-sm text-gray-500 mb-4">Trade your hard-earned coins for health and wellness rewards! (Minimum cost: 50 Coins)</p>
+            <div id="redemption-message" class="p-3 mb-4 rounded-lg font-medium hidden"></div>
+            <div id="store-items" class="space-y-4">
+                <!-- Products will be rendered here by JavaScript -->
+            </div>
+        </div>
+        <!-- --- End Redemption Store Section --- -->
+
+
+    </div>
+
+    <script>
+        // Global Game State Object
+        window.game = {
+            board: Array(9).fill(null),
+            currentPlayer: 'X', // 'X' for human, 'O' for AI
+            gameActive: true,
+            coins: 0,
+        };
+
+        // --- Game Constants ---
+        const WINNING_COMBINATIONS = [
+            [0, 1, 2], [3, 4, 5], [6, 7, 8], // Rows
+            [0, 3, 6], [1, 4, 7], [2, 5, 8], // Columns
+            [0, 4, 8], [2, 4, 6]             // Diagonals
+        ];
+        
+        // --- Redemption Store Data (All costs >= 50) ---
+        const PRODUCTS = [
+            // Health & Wellness Products
+            { name: "Vitamin Boost Pack", cost: 50, desc: "A 30-day supply of essential daily vitamins." },
+            { name: "Luxury Sleep Mask", cost: 60, desc: "An ergonomic mask for deep, restful sleep." },
+            { name: "Stress Relief Guide", cost: 75, desc: "An e-book with proven relaxation techniques." },
+            { name: "Meditation App Subscription", cost: 85, desc: "One year access to premium guided meditation." },
+            { name: "Fitness Tracker Discount", cost: 100, desc: "Voucher for 50% off a premium fitness tracker." },
+            // New Beauty Products
+            { name: "Organic Hair Care Set", cost: 90, desc: "Shampoo and conditioner set made with organic ingredients." },
+            { name: "Luxury Hydrating Face Mask", cost: 120, desc: "A premium sheet mask for ultimate skin glow." },
+        ];
+
+
+        const boardElement = document.getElementById('board');
+        const statusMessageElement = document.getElementById('status-message');
+        const coinsDisplayElement = document.getElementById('coins-display');
+        const storeItemsElement = document.getElementById('store-items');
+        const redemptionMessageElement = document.getElementById('redemption-message');
+
+
+        /**
+         * Renders the game board cells and attaches click handlers.
+         */
+        function renderBoard() {
+            boardElement.innerHTML = ''; // Clear existing cells
+            window.game.board.forEach((cellValue, index) => {
+                const cell = document.createElement('div');
+                cell.classList.add(
+                    'cell',
+                    'bg-white',
+                    'rounded-lg',
+                    'text-7xl',
+                    'font-bold'
+                );
+                cell.setAttribute('data-index', index);
+                cell.textContent = cellValue || '';
+
+                if (cellValue === 'X') {
+                    cell.classList.add('text-x');
+                } else if (cellValue === 'O') {
+                    cell.classList.add('text-o');
+                } else {
+                    cell.classList.add('hover:bg-gray-100');
+                    cell.onclick = () => handleCellClick(index);
+                }
+
+                if (!window.game.gameActive || cellValue) {
+                    cell.classList.add('disabled');
+                    cell.onclick = null; // Disable click after game end or if occupied
+                }
+
+                boardElement.appendChild(cell);
+            });
+        }
+        
+        // --- Store Functions ---
+
+        /**
+         * Renders the store items based on the current coin balance.
+         */
+        function renderStore() {
+            storeItemsElement.innerHTML = '';
+            const currentCoins = window.game.coins;
+
+            PRODUCTS.forEach(product => {
+                const canRedeem = currentCoins >= product.cost;
+                
+                const itemHtml = `
+                    <div class="flex flex-col sm:flex-row items-center justify-between p-4 bg-gray-100 rounded-xl shadow-sm transition hover:shadow-md">
+                        <div class="text-left mb-2 sm:mb-0 sm:pr-4 w-full sm:w-2/3">
+                            <p class="text-lg font-semibold text-gray-800">${product.name}</p>
+                            <p class="text-sm text-gray-500">${product.desc}</p>
+                            <p class="text-sm font-bold text-yellow-600 mt-1">${product.cost} Coins</p>
+                        </div>
+                        <button
+                            class="redeem-btn w-full sm:w-1/3 py-2 px-4 rounded-lg font-bold transition duration-200 shadow-md ${canRedeem 
+                                ? 'bg-yellow-500 hover:bg-yellow-600 text-white' 
+                                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                            }"
+                            data-cost="${product.cost}"
+                            ${canRedeem ? '' : 'disabled'}
+                            onclick="window.game.redeemProduct(${product.cost}, '${product.name}')"
+                        >
+                            ${canRedeem ? 'Redeem Now' : `Need ${product.cost - currentCoins} More`}
+                        </button>
+                    </div>
+                `;
+                storeItemsElement.insertAdjacentHTML('beforeend', itemHtml);
+            });
+        }
+
+        /**
+         * Handles the coin deduction and updates the store/database.
+         * @param {number} cost - The coin cost of the product.
+         * @param {string} productName - The name of the product being redeemed.
+         */
+        function redeemProduct(cost, productName) {
+            if (window.game.coins >= cost) {
+                window.game.coins -= cost;
+                coinsDisplayElement.textContent = window.game.coins;
+                window.saveCoins(window.game.coins); // Save new balance
+                
+                // Show success message
+                redemptionMessageElement.classList.remove('hidden', 'bg-red-200', 'text-red-700');
+                redemptionMessageElement.classList.add('bg-green-200', 'text-green-700');
+                redemptionMessageElement.textContent = `✅ Success! You redeemed "${productName}". Your new balance is ${window.game.coins} coins.`;
+
+                // Rerender the store to update button states
+                renderStore();
+            } else {
+                // Show failure message
+                redemptionMessageElement.classList.remove('hidden', 'bg-green-200', 'text-green-700');
+                redemptionMessageElement.classList.add('bg-red-200', 'text-red-700');
+                redemptionMessageElement.textContent = `❌ Cannot redeem. You only have ${window.game.coins} coins, but you need ${cost}.`;
+            }
+            
+            // Hide message after a few seconds
+            setTimeout(() => {
+                redemptionMessageElement.classList.add('hidden');
+            }, 5000);
+        }
+
+        // --- Game Logic Functions ---
+        
+        /**
+         * Checks if the current board state results in a win for the given player.
+         * @param {Array<string|null>} board - The current board state.
+         * @param {string} player - The player to check ('X' or 'O').
+         * @returns {boolean} True if the player has won.
+         */
+        function checkWin(board, player) {
+            return WINNING_COMBINATIONS.some(combination => {
+                return combination.every(index => board[index] === player);
+            });
+        }
+
+        /**
+         * Checks if the board is full (a draw).
+         * @param {Array<string|null>} board - The current board state.
+         * @returns {boolean} True if the board is full.
+         */
+        function checkDraw(board) {
+            return board.every(cell => cell !== null);
+        }
+
+        /**
+         * Updates the UI message and handles end-of-game logic.
+         * IMPORTANT: Calls renderStore() after coin change.
+         * @param {string} message - The message to display.
+         * @param {string|null} result - 'win', 'lose', 'draw', or null.
+         */
+        function updateStatus(message, result = null) {
+            statusMessageElement.textContent = message;
+
+            if (result === 'win') {
+                statusMessageElement.className = 'text-xl font-bold text-green-600 transition duration-300';
+                window.game.gameActive = false;
+                window.game.coins += 1;
+                coinsDisplayElement.textContent = window.game.coins;
+                window.saveCoins(window.game.coins);
+                renderBoard(); // Disable further clicks
+                renderStore(); // Refresh store buttons/status
+            } else if (result === 'lose') {
+                statusMessageElement.className = 'text-xl font-bold text-red-600 transition duration-300';
+                window.game.gameActive = false;
+                renderBoard();
+            } else if (result === 'draw') {
+                statusMessageElement.className = 'text-xl font-bold text-gray-600 transition duration-300';
+                window.game.gameActive = false;
+                renderBoard();
+            } else if (window.game.currentPlayer === 'X') {
+                statusMessageElement.className = 'text-xl font-bold text-blue-600 transition duration-300';
+            } else {
+                statusMessageElement.className = 'text-xl font-bold text-red-600 transition duration-300';
+            }
+        }
+
+        /**
+         * Main function for the human player's move.
+         * @param {number} index - The index of the clicked cell.
+         */
+        function handleCellClick(index) {
+            if (window.game.board[index] === null && window.game.gameActive && window.game.currentPlayer === 'X') {
+                window.game.board[index] = 'X';
+                renderBoard();
+
+                if (checkWin(window.game.board, 'X')) {
+                    updateStatus('🎉 You won and got 1 Coin! 🎉', 'win');
+                } else if (checkDraw(window.game.board)) {
+                    updateStatus('🤝 It\'s a Draw! 🤝', 'draw');
+                } else {
+                    window.game.currentPlayer = 'O';
+                    updateStatus('Computer\'s Turn (O)');
+                    // Delay computer move for a better user experience
+                    setTimeout(computerMove, 500);
+                }
+            }
+        }
+
+        /**
+         * AI logic: A simple, non-too-hard strategy.
+         */
+        function computerMove() {
+            const board = window.game.board;
+            const openSpots = board
+                .map((val, index) => val === null ? index : null)
+                .filter(val => val !== null);
+
+            let move = null;
+
+            // Helper to check and return the winning/blocking move index
+            const getStrategicMove = (player) => {
+                for (const combination of WINNING_COMBINATIONS) {
+                    const [a, b, c] = combination;
+                    const spot = combination.find(index => board[index] === null);
+                    const count = combination.filter(index => board[index] === player).length;
+
+                    if (count === 2 && spot !== undefined) {
+                        return spot;
+                    }
+                }
+                return null;
+            };
+
+            // 1. Check for 'O' win
+            move = getStrategicMove('O');
+            if (move === null) {
+                // 2. Check for 'X' block
+                move = getStrategicMove('X');
+            }
+            
+            // 3. Take Center (4)
+            if (move === null && board[4] === null) {
+                move = 4;
+            }
+
+            // 4. Take a random corner (0, 2, 6, 8)
+            if (move === null) {
+                const corners = [0, 2, 6, 8].filter(index => board[index] === null);
+                if (corners.length > 0) {
+                    move = corners[Math.floor(Math.random() * corners.length)];
+                }
+            }
+
+            // 5. Take any open spot
+            if (move === null && openSpots.length > 0) {
+                move = openSpots[Math.floor(Math.random() * openSpots.length)];
+            }
+
+            // Execute move
+            if (move !== null) {
+                window.game.board[move] = 'O';
+                renderBoard();
+
+                if (checkWin(window.game.board, 'O')) {
+                    updateStatus('😥 You lose. Try again!', 'lose');
+                } else if (checkDraw(window.game.board)) {
+                    updateStatus('🤝 It\'s a Draw! 🤝', 'draw');
+                } else {
+                    window.game.currentPlayer = 'X';
+                    updateStatus('Your Turn (X)');
+                }
+            }
+        }
+
+        /**
+         * Resets the game state and board UI.
+         */
+        function resetGame() {
+            window.game.board = Array(9).fill(null);
+            window.game.gameActive = true;
+            // X always starts
+            window.game.currentPlayer = 'X';
+            renderBoard();
+            updateStatus('Your Turn (X)');
+        }
+
+        // Expose functions for HTML/module script access
+        window.game.resetGame = resetGame;
+        window.game.redeemProduct = redeemProduct;
+        window.game.renderStore = renderStore;
+
+        // --- Initialization ---
+        window.addEventListener('load', () => {
+            renderBoard();
+            updateStatus('Your Turn (X)');
+            // Initial render of the store in case Firebase setup is slow or in Local Mode
+            renderStore(); 
+        });
+    </script>
+</body>
+</html>

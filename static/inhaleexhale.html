@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inhale & Exhale Game</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Load Firebase SDKs -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // --- GLOBAL SETUP ---
+
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        // PASTE YOUR FIREBASE CONFIG OBJECT HERE
+        const firebaseConfig = {
+          apiKey: "AIza...",
+          authDomain: "your-project.firebaseapp.com",
+          projectId: "your-project",
+          storageBucket: "your-project.appspot.com",
+          messagingSenderId: "...",
+          appId: "1:..."
+        };
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        // Check if config is present to enable Firestore, otherwise run in local mode
+        let isFirestoreEnabled = Object.keys(firebaseConfig).length > 0;
+        
+        window.coins = 0; // Initialize local score
+        window.db = null;
+        window.auth = null;
+
+        if (isFirestoreEnabled) {
+            const app = initializeApp(firebaseConfig);
+            window.db = getFirestore(app);
+            window.auth = getAuth(app);
+        } else {
+            console.warn("Firebase configuration is missing. Score will not be persistent.");
+        }
+        
+        // --- AUTHENTICATION & INITIALIZATION ---
+
+        async function initApp() {
+            const loadingStateEl = document.getElementById('loading-state');
+            const gameContainerEl = document.getElementById('game-container');
+            const userIdEl = document.getElementById('user-id');
+            const warningEl = document.getElementById('firestore-warning');
+
+            if (isFirestoreEnabled) {
+                try {
+                    // Authenticate the user
+                    if (initialAuthToken) {
+                        await signInWithCustomToken(window.auth, initialAuthToken);
+                    } else {
+                        await signInAnonymously(window.auth);
+                    }
+                } catch (error) {
+                    console.error("Authentication failed:", error);
+                    isFirestoreEnabled = false; // Disable Firestore if auth fails
+                    warningEl.textContent = "Error: Authentication failed. Score will not be persistent.";
+                }
+
+                if (isFirestoreEnabled) {
+                    // Set up the game once authentication is stable
+                    onAuthStateChanged(window.auth, (user) => {
+                        if (user) {
+                            window.userId = user.uid;
+                            userIdEl.textContent = `User ID: ${window.userId.substring(0, 8)}...`;
+                            setupFirestoreListener();
+                        } else {
+                            console.log("User signed out or failed to sign in.");
+                            // Fallback to local mode if signed out unexpectedly
+                            isFirestoreEnabled = false;
+                            warningEl.textContent = "Error: Authentication failed. Score will not be persistent.";
+                            finalizeInit(loadingStateEl, gameContainerEl);
+                        }
+                    });
+                } else {
+                    // If auth was disabled after initial check
+                    finalizeInit(loadingStateEl, gameContainerEl);
+                }
+
+            } else {
+                // Not Firestore Enabled Path
+                warningEl.textContent = "Warning: Persistent score saving is disabled (Missing Firebase config). Score will be lost on refresh.";
+                userIdEl.textContent = "User ID: Local Session";
+                finalizeInit(loadingStateEl, gameContainerEl);
+            }
+        }
+
+        // Hides loading overlay and shows the game container
+        function finalizeInit(loadingEl, gameEl) {
+             loadingEl.classList.add('hidden');
+             gameEl.classList.remove('hidden');
+        }
+
+
+        // --- FIRESTORE LOGIC ---
+
+        function getUserScoreRef() {
+            if (!window.userId || !window.db) return null;
+            // Private data path: /artifacts/{appId}/users/{userId}/meditation_game/score_document
+            const docPath = `/artifacts/${appId}/users/${window.userId}/meditation_game/score_document`;
+            return doc(window.db, docPath);
+        }
+
+        function setupFirestoreListener() {
+            const scoreRef = getUserScoreRef();
+            const pointsCountEl = document.getElementById('points-count');
+            
+            if (scoreRef) {
+                onSnapshot(scoreRef, (docSnap) => {
+                    const coins = docSnap.exists() ? docSnap.data().coins : 0;
+                    window.coins = coins;
+                    pointsCountEl.textContent = coins;
+                    finalizeInit(document.getElementById('loading-state'), document.getElementById('game-container'));
+                }, (error) => {
+                    console.error("Error setting up Firestore listener, switching to local mode:", error);
+                    isFirestoreEnabled = false;
+                    document.getElementById('firestore-warning').textContent = "Error loading score. Switched to local mode.";
+                    finalizeInit(document.getElementById('loading-state'), document.getElementById('game-container'));
+                });
+            }
+        }
+
+        async function awardPoint() {
+            const pointsCountEl = document.getElementById('points-count');
+
+            if (isFirestoreEnabled) {
+                const scoreRef = getUserScoreRef();
+                if (!scoreRef) return;
+                
+                const currentCoins = window.coins || 0;
+                const newCoins = currentCoins + 1;
+                window.coins = newCoins; // Optimistically update UI
+                pointsCountEl.textContent = newCoins;
+                
+                try {
+                    // Update the score in Firestore
+                    await setDoc(scoreRef, { coins: newCoins }, { merge: true });
+                    console.log("Point awarded and saved successfully. New score:", newCoins);
+                } catch (error) {
+                    console.error("Error saving coin to Firestore. Check connection/rules.", error);
+                    // On failure, onSnapshot should eventually update/correct the UI, but we let the optimistic update stand for now
+                }
+            } else {
+                // Local Mode Scoring
+                window.coins += 1;
+                pointsCountEl.textContent = window.coins;
+                console.log("Point awarded locally. New score:", window.coins);
+            }
+        }
+
+        // --- GAME LOGIC ---
+        
+        let cycleInterval = null; // To hold the interval/timeout chain reference
+
+        function startGame() {
+            const ball = document.getElementById('stress-ball');
+            const instructionText = document.getElementById('instruction-text');
+            const startButton = document.getElementById('start-button');
+            
+            if (ball.dataset.running === 'true') {
+                return; // Game already running
+            }
+            
+            ball.dataset.running = 'true';
+            startButton.classList.add('hidden');
+            
+            function runCycle() {
+                // 1. INHALE PHASE (4 seconds)
+                ball.classList.remove('exhale');
+                ball.classList.add('inhale');
+                ball.textContent = 'INHALE';
+                instructionText.textContent = 'Expand your lungs. Hold for a moment... (4s)';
+                
+                cycleInterval = setTimeout(() => {
+                    // 2. EXHALE PHASE (6 seconds)
+                    ball.classList.remove('inhale');
+                    ball.classList.add('exhale');
+                    ball.textContent = 'EXHALE';
+                    instructionText.textContent = 'Slowly release all the air. (6s)';
+                    
+                    // Award point after a full cycle (Inhale + Exhale)
+                    awardPoint(); 
+                    
+                    cycleInterval = setTimeout(() => {
+                        // 3. PAUSE/REPEAT (2 seconds)
+                        ball.classList.remove('exhale');
+                        ball.textContent = '';
+                        instructionText.textContent = 'Ready for the next cycle... (2s)';
+                        
+                        cycleInterval = setTimeout(runCycle, 2000); // Wait 2 seconds before repeating
+                    }, 6000);
+                }, 4000);
+            }
+
+            // Start the first cycle after a short delay
+            instructionText.textContent = 'Starting in 3 seconds...';
+            cycleInterval = setTimeout(runCycle, 3000);
+        }
+
+        // Expose startGame globally so the button can call it
+        window.startGame = startGame;
+        
+        // --- WINDOW LOAD ---
+        window.onload = initApp;
+
+    </script>
+    <style>
+        /* Custom CSS for the stress ball animation and aesthetics */
+        :root {
+            --inhale-color: #4CAF50; /* Calming Green */
+            --exhale-color: #2196F3; /* Calming Blue */
+            --bg-color: #f7f9fc;
+            --text-color: #374151;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+        
+        .ball-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            padding: 2rem;
+        }
+
+        #stress-ball {
+            /* Initial state and transition settings */
+            width: 180px;
+            height: 180px;
+            background: linear-gradient(135deg, var(--inhale-color), var(--exhale-color));
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: white;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            user-select: none;
+            transition: transform 4s ease-in-out, 
+                        box-shadow 0.5s ease-in-out,
+                        opacity 0.5s ease-in-out,
+                        width 0.5s ease-in-out,
+                        height 0.5s ease-in-out;
+            margin-bottom: 2rem;
+            text-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+        }
+
+        /* INHALE: Grows over 4 seconds */
+        #stress-ball.inhale {
+            transform: scale(1.6); /* Stretches up (grows larger) */
+            box-shadow: 0 0 40px rgba(76, 175, 80, 0.8);
+            transition-duration: 4s;
+        }
+
+        /* EXHALE: Shrinks over 6 seconds */
+        #stress-ball.exhale {
+            transform: scale(0.8); /* Squeezes (shrinks smaller than original) */
+            box-shadow: 0 0 20px rgba(33, 150, 243, 0.6);
+            transition-duration: 6s;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 640px) {
+            #stress-ball {
+                width: 140px;
+                height: 140px;
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Main Container -->
+    <div id="game-container" class="max-w-xl w-full p-6 bg-white rounded-xl shadow-2xl transition-all duration-500 hidden">
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-2xl font-bold text-gray-800">Mindful Breath Game</h1>
+            <div id="points-display" class="flex items-center text-lg font-medium text-green-600 bg-green-50 p-2 rounded-lg">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c1.657 0 3 .895 3 2s-1.343 2-3 2-3-.895-3-2 1.343-2 3-2zM4 16h16V4H4v12zm0 0c0 4.418 3.582 8 8 8s8-3.582 8-8m-4-8a4 4 0 100-8 4 4 0 000 8z" />
+                </svg>
+                <span class="mr-1">Coins:</span>
+                <span id="points-count" class="font-extrabold">0</span>
+            </div>
+        </div>
+        
+        <div class="ball-container">
+            <div id="stress-ball" class="ball" data-running="false">
+                
+            </div>
+            
+            <p id="instruction-text" class="text-xl font-semibold mt-4 text-center h-10 text-gray-600">
+                Click Start to begin your meditation.
+            </p>
+
+            <button id="start-button" onclick="startGame()" class="mt-8 px-8 py-3 bg-indigo-500 text-white font-semibold rounded-full shadow-lg hover:bg-indigo-600 transition duration-300 ease-in-out transform hover:scale-105">
+                Start Breathing Cycle
+            </button>
+        </div>
+        
+        <div class="mt-8 pt-4 border-t border-gray-100 text-sm text-gray-500 text-center">
+            <p>One coin is rewarded after each complete Inhale/Exhale cycle.</p>
+            <p id="user-id" class="mt-1"></p>
+            <!-- New warning element for configuration issues -->
+            <p id="firestore-warning" class="mt-1 text-red-500 font-medium"></p>
+        </div>
+    </div>
+
+    <!-- Loading/Error State -->
+    <div id="loading-state" class="absolute inset-0 flex items-center justify-center bg-gray-50/75 backdrop-blur-sm z-50">
+        <p class="text-lg font-medium text-gray-700">Initializing Score...</p>
+    </div>
+
+</body>
+</html>
